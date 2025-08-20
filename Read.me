@@ -1,0 +1,25 @@
+run -- -f SYSTEM_LOG -k 127.0.0.1 -t quickstart-events
+
+/* Prepare Minimal Local Kafka Server
+https://kafka.apache.org/quickstart
+// Generate a Cluster UUID
+KAFKA_CLUSTER_ID="$(./bin/kafka-storage.sh random-uuid)"
+
+// Format Log Directories
+./bin/kafka-storage.sh format --standalone -t $KAFKA_CLUSTER_ID -c ./config/server.properties
+
+// Start Kafka Server
+./bin/kafka-server-start.sh ./config/server.properties
+
+// Create Topic
+./bin/kafka-topics.sh --create --topic quickstart-events --bootstrap-server 127.0.0.1:9092
+
+// Check Topic
+./bin/kafka-topics.sh --describe --topic quickstart-events --bootstrap-server 127.0.0.1:9092
+
+// Read Events from Topic
+./bin/kafka-console-consumer.sh --topic quickstart-events --from-beginning --bootstrap-server 127.0.0.1:9092
+
+// Write Events to Topic
+./bin/kafka-console-producer.sh --topic quickstart-events --bootstrap-server 127.0.0.1:9092
+*/
