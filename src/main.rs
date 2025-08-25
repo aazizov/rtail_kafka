@@ -1,11 +1,9 @@
-use std::env;
 use std::process::ExitCode;
 use rdkafka::config::ClientConfig;
 use rdkafka::producer::{BaseProducer, BaseRecord, Producer};
 use std::time::{Duration, SystemTime};
 use chrono::{DateTime, Utc};
 use clap::Parser;
-use rdkafka::error::KafkaError;
 
 // -- SYSTEM_LOG 127.0.0.1 9092 quickstart-events
 
@@ -21,7 +19,7 @@ struct Args {
     kafka_host: String,
 
     /// Kafka port Number
-    #[arg(short, long, default_value_t = 9092)]
+    #[arg(short, long, default_value_t = 9094)]
     port: u16,
 
     /// Topic Name

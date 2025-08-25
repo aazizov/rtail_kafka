@@ -2,24 +2,47 @@ run -- -f SYSTEM_LOG -k 127.0.0.1 -t quickstart-events
 
 /* Prepare Minimal Local Kafka Server
 https://kafka.apache.org/quickstart
+// !!!!! for Windows
+// Java8 + kafka_2.13-3.6.0 (With Kraft mode - for using without Zookeeper)
+// (Apache Kafka has officially deprecated ZooKeeper in version 3.5)
+$KAFKA_CLUSTER_ID=& ".\bin\windows\kafka-storage.bat" random-uuid
+echo $KAFKA_CLUSTER_ID
+// Format Log Directories
+.\bin\windows\kafka-storage.bat format -t $KAFKA_CLUSTER_ID -c .\config\kraft\server.properties --ignore-formatted
+// Start Kafka Server
+.\bin\windows\kafka-server-start.bat .\config\kraft\server.properties
+// Create Topic
+.\bin\kafka-topics.sh --create --topic tekila_events --bootstrap-server 127.0.0.1:9092
+// Check Topic
+.\bin\kafka-topics.sh --describe --topic tekila_events --bootstrap-server 127.0.0.1:9092
+// Read Events from Topic
+.\bin\kafka-topics.sh --describe --topic tekila_events --bootstrap-server 127.0.0.1:9092
+// Write Events to Topic
+
+// For Linux(10.13.44.169 port 9094 (9092 used by NiFi))
+KAFKA_CLUSTER_ID="$(./bin/kafka-storage.sh random-uuid)"
+echo $KAFKA_CLUSTER_ID
+./bin/kafka-storage.sh format -t $KAFKA_CLUSTER_ID -c ./config/kraft/server.properties --ignore-formatted
+./bin/kafka-server-start.sh ./config/kraft/server.properties // 9092 -> 9094 in server.properties
+./bin/kafka-topics.sh --create --topic tekila-events --bootstrap-server 127.0.0.1:9094
+./bin/kafka-topics.sh --describe --topic tekila-events --bootstrap-server 127.0.0.1:9094
+./bin/kafka-console-consumer.sh --topic tekila-events --from-beginning --bootstrap-server 127.0.0.1:9094
+./bin/kafka-console-producer.sh --topic tekila-events --bootstrap-server 127.0.0.1:9094
+
+// For MAC
 // Generate a Cluster UUID
 KAFKA_CLUSTER_ID="$(./bin/kafka-storage.sh random-uuid)"
-
+echo $KAFKA_CLUSTER_ID
 // Format Log Directories
 ./bin/kafka-storage.sh format --standalone -t $KAFKA_CLUSTER_ID -c ./config/server.properties
-
 // Start Kafka Server
 ./bin/kafka-server-start.sh ./config/server.properties
-
 // Create Topic
 ./bin/kafka-topics.sh --create --topic quickstart-events --bootstrap-server 127.0.0.1:9092
-
 // Check Topic
 ./bin/kafka-topics.sh --describe --topic quickstart-events --bootstrap-server 127.0.0.1:9092
-
 // Read Events from Topic
 ./bin/kafka-console-consumer.sh --topic quickstart-events --from-beginning --bootstrap-server 127.0.0.1:9092
-
 // Write Events to Topic
 ./bin/kafka-console-producer.sh --topic quickstart-events --bootstrap-server 127.0.0.1:9092
 */
