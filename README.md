@@ -1,4 +1,5 @@
 # rtail_kafka
+
 ## Rust Implementation of _tail_ - GNU_Linux utility with Kafka producer(publisher) possibility.
 This utility follow(catch up) for any LOG file and send string by string changes to Kafka server.
 For usage You need to insert follow keys :
