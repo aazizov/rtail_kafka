@@ -1,23 +1,33 @@
+
+run --package rtail_kafka --bin rtail_kafka -- -f SYSTEM_LOG.txt -i 127.0.0.1 -p 9092 -t tekila-events
+
 run -- -f SYSTEM_LOG -k 127.0.0.1 -t quickstart-events
+
+// Create Topic with "purge"(retention period) One day (86,400,000 milliseconds = 24 hours).
+./bin/kafka-topics.sh --create --topic tekila-events --bootstrap-server 127.0.0.1:9094 retention.ms=86400000
+// https://www.google.com/search?q=how+to+purge+kafka+queue+periodicaly&sca_esv=107875cc47e6417b&rlz=1C1GCEU_enAZ1135AZ1135&sxsrf=AE3TifPxtcF10eXtf6SV46-Kde6ZhCqs4w%3A1756886798864&ei=Dve3aLHBNIelwPAPs9TeoQM&ved=0ahUKEwixgLqskbyPAxWHEhAIHTOqNzQQ4dUDCBA&uact=5&oq=how+to+purge+kafka+queue+periodicaly&gs_lp=Egxnd3Mtd2l6LXNlcnAiJGhvdyB0byBwdXJnZSBrYWZrYSBxdWV1ZSBwZXJpb2RpY2FseTIHECEYoAEYCkjIblD_DliOanABeACQAQCYAecCoAHVHKoBCDAuMjEuMS4xuAEDyAEA-AEBmAIUoALeF8ICChAAGLADGNYEGEfCAgYQABgHGB7CAggQABgHGAgYHsICCxAAGIAEGIYDGIoFwgIIEAAYogQYiQXCAgUQABjvBcICCBAAGIAEGKIEwgIEEAAYHsICBhAAGBYYHsICBRAhGKABmAMAiAYBkAYIkgcIMS4xNy4xLjGgB9desgcIMC4xNy4xLjG4B9EXwgcIMC4xMS44LjHIB0A&sclient=gws-wiz-serp
 
 /* Prepare Minimal Local Kafka Server
 https://kafka.apache.org/quickstart
 // !!!!! for Windows
 // Java8 + kafka_2.13-3.6.0 (With Kraft mode - for using without Zookeeper)
+// Delete Folder D:\tmp\kraft-combined-logs
 // (Apache Kafka has officially deprecated ZooKeeper in version 3.5)
-$KAFKA_CLUSTER_ID=& ".\bin\windows\kafka-storage.bat" random-uuid
+set $KAFKA_CLUSTER_ID=& ".\bin\windows\kafka-storage.bat" random-uuid
 echo $KAFKA_CLUSTER_ID
 // Format Log Directories
 .\bin\windows\kafka-storage.bat format -t $KAFKA_CLUSTER_ID -c .\config\kraft\server.properties --ignore-formatted
 // Start Kafka Server
 .\bin\windows\kafka-server-start.bat .\config\kraft\server.properties
 // Create Topic
-.\bin\kafka-topics.sh --create --topic tekila_events --bootstrap-server 127.0.0.1:9092
+.\bin\windows\kafka-topics.bat --create --topic tekila-events --bootstrap-server 127.0.0.1:9092
 // Check Topic
-.\bin\kafka-topics.sh --describe --topic tekila_events --bootstrap-server 127.0.0.1:9092
+.\bin\windows\kafka-topics.bat --describe --topic tekila-events --bootstrap-server 127.0.0.1:9092
 // Read Events from Topic
-.\bin\kafka-topics.sh --describe --topic tekila_events --bootstrap-server 127.0.0.1:9092
+//.\bin\windows\kafka-console-consumer.bat --topic tekila-events --from-beginning --bootstrap-server 127.0.0.1:9092
+.\bin\windows\kafka-console-consumer.bat --topic tekila-events --bootstrap-server 127.0.0.1:9092
 // Write Events to Topic
+.\bin\windows\kafka-console-producer.bat --topic tekila-events --bootstrap-server 127.0.0.1:9092
 
 // For Linux(10.13.44.169 port 9094 (9092 used by NiFi))
 KAFKA_CLUSTER_ID="$(./bin/kafka-storage.sh random-uuid)"
