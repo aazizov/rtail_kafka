@@ -15,6 +15,6 @@ Fo example, iif we have to send any saved changes in SYSTEM_LOG file to Kafka se
 For easy using also uploaded compiled release versions for every platform : 
 - for Windows x64 - ![rtail_kafka.exe](https://github.com/aazizov/rtail_kafka/blob/master/releases/rtail_kafka.exe)
 - for Linux - 
-- for Mac - ![rtail_kafka.exe](https://github.com/aazizov/rtail_kafka/blob/master/releases/rtail_kafka)
+- for Mac - ![rtail_kafka](https://github.com/aazizov/rtail_kafka/blob/master/releases/rtail_kafka)
 
 
