@@ -13,8 +13,8 @@ Fo example, iif we have to send any saved changes in SYSTEM_LOG file to Kafka se
 #### **rtail_kafka.exe -f SYSTEM_LOG -i 192.168.0.100 -p 9092 -t system_changes**
 
 For easy using also uploaded compiled release versions for every platform : 
-- for Windows - 
-- for Linux
-- for Mac
+- for Windows x64 - ![rtail_kafka.exe](https://github.com/aazizov/rtail_kafka/blob/master/releases/rtail_kafka.exe)
+- for Linux - 
+- for Mac - ![rtail_kafka](https://github.com/aazizov/rtail_kafka/blob/master/releases/rtail_kafka)
 
 
