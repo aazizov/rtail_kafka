@@ -32,15 +32,27 @@ fn main() -> ExitCode {
         Ok(m) => { m }
         Err(f) => { panic!("{}", f.to_string()) }
     };
-    if matches.opt_present("h") {   // || Check count of args < 5(9) 
+    if matches.opt_present("h") || args.len() < 9 { 
         print_usage(&program, opts);
-//        ExitCode::FAILURE
     }
-    let file = matches.opt_str("f").unwrap().to_string();
+
+    let p_args = match get_args() {
+        Err (why) => panic!("Not correct args!"),
+        Ok(p_args) => p_args        
+    };
+    
+/*    let file = matches.opt_str("f").unwrap().to_string();
     let host_kafka = matches.opt_str("i").unwrap().to_string();
     let port_kafka = matches.opt_str("p").unwrap().to_string();
     let topic_name = matches.opt_str("t").unwrap().to_string();
-
+*/
+    
+    let file = p_args.opt_str("f").unwrap().to_string();
+    let host_kafka = p_args.opt_str("i").unwrap().to_string();
+    let port_kafka = p_args.opt_str("p").unwrap().to_string();
+    let topic_name = p_args.opt_str("t").unwrap().to_string();
+    
+    
     let producer: BaseProducer = kafka_init(host_kafka, port_kafka);    // Connect to Kafka as producer
     
     tail_file(&file, 10, true, producer, topic_name);
@@ -85,11 +97,11 @@ fn get_now() -> String {
 fn get_args() -> Result<Matches, String> {
         let args: Vec<String> = env::args().collect();
         let mut options = Options::new();
-        options.optopt("f", "-follow", "output appended data as the file grows", "FOLLOW");
-        options.optflag("i", "-ip_address", "kafka ip_address");
-        options.optflag("p", "-port_number", "kafka port");
-        options.optflag("t", "-topic_name", "kafka topic");
-        options.optflag("h", "-help", "print help");
+        options.optopt("f", "", "output appended data as the file grows", "FOLLOW");
+        options.optopt("i", "", "kafka ip_address", "");
+        options.optopt("p", "", "kafka port", "");
+        options.optopt("t", "", "kafka topic", "");
+        options.optflag("h", "", "print help");
         let cmd_args = match options.parse(&args[1..]) {
             Ok(p) => p,
             Err(why) => panic!("Cannot parse command args :{}", why),
@@ -101,6 +113,7 @@ fn get_args() -> Result<Matches, String> {
 fn print_usage(program: &str, opts: Options) {
     let brief = format!("Usage: {} FILE [options]", program);
     print!("{}", opts.usage(&brief));
+    process::exit(0);
 }
 
 fn tail_file(path: &String, count: u64, fflag: bool, producer: BaseProducer, topic: String){
@@ -210,4 +223,5 @@ fn tail_file_follow(reader: &mut BufReader<File>, spath: &String, file_size: u64
 fn print_result(message: &String, producer: &BaseProducer, topic: &String){
     kafka_send(producer, topic.to_string(), message.to_string());
     print!("{}", message);
+    process::exit(0);
 }
