@@ -133,6 +133,8 @@ fn tail_file(path: &String, count: u64, fflag: bool, producer: BaseProducer, top
     let mut reader = BufReader::new(file);
 
     let mut line_count = 0;
+  
+    
     // minus 2 byte for skip eof null byte.
     let mut current_pos = f_size - 2;
     let mut read_start = if (f_size -2) > BUF_SIZE as u64 {
@@ -140,6 +142,7 @@ fn tail_file(path: &String, count: u64, fflag: bool, producer: BaseProducer, top
     }else{
         0
     };
+    
     let mut buf = [0;BUF_SIZE];
     'outer: loop {
         match reader.seek(SeekFrom::Start(read_start)){

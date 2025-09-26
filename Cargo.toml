@@ -2,6 +2,7 @@
 name = "rtail_kafka"
 version = "0.1.0"
 edition = "2024"
+authors = ["Alakbar Azizov <a.azizov@yahoo.com>"]
 
 [dependencies]
 rdkafka = { version = "0.38.0", features = ["cmake-build"] }
@@ -9,3 +10,4 @@ chrono = "0.4.41"
 getopts = "0.2.24"
 notify = "4.0.3"
 clap = { version = "4.5.47", features = ["derive"] }
+mysql = "26.0.1"
