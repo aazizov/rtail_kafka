@@ -16,58 +16,63 @@ use std::error::Error;
 use std::string::ToString;
 use notify::{RecommendedWatcher, Watcher, RecursiveMode};
 use std::sync::mpsc::channel;
+use rdkafka::error::KafkaError;
 
 const BUF_SIZE :usize = 1024;
 
 fn main() -> ExitCode {
-    let args: Vec<_> = std::env::args().collect();
-    let program = args[0].clone();
-    let mut opts = Options::new();
-    opts.optopt("f", "follow", "kafka sent data as the file grows", "FILE");
-    opts.optopt("i", "ip_address", "kafka ip_address", "");
-    opts.optopt("p", "port_number", "kafka port", "");
-    opts.optopt("t", "topic_name", "kafka topic", "");    
-    opts.optflag("h", "help", "print help");
-    let matches = match opts.parse(&args[1..]) {
-        Ok(m) => { m }
-        Err(f) => { panic!("{}", f.to_string()) }
-    };
-    if matches.opt_present("h") || args.len() < 9 { 
-        print_usage(&program, opts);
-    }
 
+// Get CLI Args    
     let p_args = match get_args() {
         Err (why) => panic!("Not correct args!"),
-        Ok(p_args) => p_args        
+        Ok(p_args) => p_args
     };
-    
-/*    let file = matches.opt_str("f").unwrap().to_string();
-    let host_kafka = matches.opt_str("i").unwrap().to_string();
-    let port_kafka = matches.opt_str("p").unwrap().to_string();
-    let topic_name = matches.opt_str("t").unwrap().to_string();
-*/
-    
+
+// Parse Args as Params   
     let file = p_args.opt_str("f").unwrap().to_string();
     let host_kafka = p_args.opt_str("i").unwrap().to_string();
     let port_kafka = p_args.opt_str("p").unwrap().to_string();
     let topic_name = p_args.opt_str("t").unwrap().to_string();
     
-    
-    let producer: BaseProducer = kafka_init(host_kafka, port_kafka);    // Connect to Kafka as producer
-    
+// Init Kafka Producer    
+    let producer: BaseProducer = match kafka_producer_init(host_kafka, port_kafka){
+        Err(why) => panic!("couldn't create producer!"),
+        Ok(producer) => producer
+    };    // Connect to Kafka as producer
+
+// Main Loop    
     tail_file(&file, 10, true, producer, topic_name);
 
     ExitCode::SUCCESS
-    }
+}
 
-fn kafka_init(host_kafka: String, port_kafka: String) -> BaseProducer { //} Result<BaseProducer, KafkaError>  {
+fn get_args() -> Result<Matches, String> {
+    let args: Vec<String> = env::args().collect();
+    let program = args[0].clone();
+    let mut options = Options::new();
+    options.optopt("f", "follow", "kafka sent data as the file grows string by string", "FILE");
+    options.optopt("i", "ip_address", "kafka ip_address", "");
+    options.optopt("p", "port_number", "kafka port", "");
+    options.optopt("t", "topic_name", "kafka topic", "");
+    options.optflag("h", "help", "print help");
+    let cmd_args = match options.parse(&args[1..]) {
+        Ok(p) => p,
+        Err(why) => panic!("Cannot parse command args :{}", why),
+    };
+    if cmd_args.opt_present("h") || args.len() < 9 {
+        print_usage(&program, options);
+    }
+    Ok(cmd_args)
+}
+
+
+fn kafka_producer_init(host_kafka: String, port_kafka: String) -> Result<BaseProducer, KafkaError> { //} Result<BaseProducer, KafkaError>  {
         let producer: BaseProducer = ClientConfig::new()
             .set("bootstrap.servers",  host_kafka + ":" + &port_kafka) // "127.0.0.1:9092")
             .create()
             .expect("Producer creation error");
-    //    return Ok(producer);
         println!("{} Kafka inited.", get_now());
-        return producer;
+        Ok(producer)
 }
 
 fn kafka_send(producer: &BaseProducer, topic: String, message: String) -> &BaseProducer { //Result<BaseProducer, KafkaError> {
@@ -89,33 +94,6 @@ fn kafka_send(producer: &BaseProducer, topic: String, message: String) -> &BaseP
         return producer;
 }
 
-fn get_now() -> String {
-        let local_datetime: String = Local::now().format("%Y-%m-%d %H:%M:%S%.9f").to_string();
-        local_datetime
-}
-
-fn get_args() -> Result<Matches, String> {
-        let args: Vec<String> = env::args().collect();
-        let mut options = Options::new();
-        options.optopt("f", "", "output appended data as the file grows", "FOLLOW");
-        options.optopt("i", "", "kafka ip_address", "");
-        options.optopt("p", "", "kafka port", "");
-        options.optopt("t", "", "kafka topic", "");
-        options.optflag("h", "", "print help");
-        let cmd_args = match options.parse(&args[1..]) {
-            Ok(p) => p,
-            Err(why) => panic!("Cannot parse command args :{}", why),
-        };
-    
-        Ok(cmd_args)
-}
-
-fn print_usage(program: &str, opts: Options) {
-    let brief = format!("Usage: {} FILE [options]", program);
-    print!("{}", opts.usage(&brief));
-    process::exit(0);
-}
-
 fn tail_file(path: &String, count: u64, fflag: bool, producer: BaseProducer, topic: String){
     let file = match OpenOptions::new().read(true).open(path) {
         Err (why) => panic!("Cannot open file! file:{} cause:{}", path, Error::description(&why)),
@@ -133,8 +111,8 @@ fn tail_file(path: &String, count: u64, fflag: bool, producer: BaseProducer, top
     let mut reader = BufReader::new(file);
 
     let mut line_count = 0;
-  
-    
+
+
     // minus 2 byte for skip eof null byte.
     let mut current_pos = f_size - 2;
     let mut read_start = if (f_size -2) > BUF_SIZE as u64 {
@@ -142,7 +120,7 @@ fn tail_file(path: &String, count: u64, fflag: bool, producer: BaseProducer, top
     }else{
         0
     };
-    
+
     let mut buf = [0;BUF_SIZE];
     'outer: loop {
         match reader.seek(SeekFrom::Start(read_start)){
@@ -223,8 +201,16 @@ fn tail_file_follow(reader: &mut BufReader<File>, spath: &String, file_size: u64
     }
 }
 
-fn print_result(message: &String, producer: &BaseProducer, topic: &String){
-    kafka_send(producer, topic.to_string(), message.to_string());
-    print!("{}", message);
+
+fn get_now() -> String {
+        let local_datetime: String = Local::now().format("%Y-%m-%d %H:%M:%S%.9f").to_string();
+        local_datetime
+}
+
+
+fn print_usage(program: &str, opts: Options) {
+    let brief = format!("Usage: {} FILE [options]", program);
+    print!("{}", opts.usage(&brief));
     process::exit(0);
 }
+
