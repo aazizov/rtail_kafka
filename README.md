@@ -10,8 +10,9 @@ For usage You need to insert follow keys :
 - -t - kafka server **topic** name for insert changes
 
 Fo example, iif we have to send any saved changes in SYSTEM_LOG file to Kafka server, we can execute follow command :
-#### **rtail_kafka.exe -f SYSTEM_LOG -i 192.168.0.100 -p 9092 -t system_changes**
-
+```bash
+rtail_kafka.exe -f SYSTEM_LOG -i 192.168.0.100 -p 9092 -t system_changes
+```
 For easy using also uploaded compiled release versions for every platform : 
 - for Windows x64 - ![rtail_kafka.exe](https://github.com/aazizov/rtail_kafka/blob/master/releases/rtail_kafka.exe)
 - for Linux - 
